@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internet Speed Test</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 1.8em;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .spinner {
+      margin-top: 20px;
+      display: inline-block;
+      width: 80px;
+      height: 80px;
+    }
+
+    .spinner:after {
+      content: " ";
+      display: block;
+      width: 64px;
+      height: 64px;
+      margin: 8px;
+      border-radius: 50%;
+      border: 6px solid #fff;
+      border-color: #fff transparent #fff transparent;
+      animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Internet Speed Test</h1>
+  <button onclick="checkFullSpeed()">Start 30-Second Speed Test</button>
+  <div id="result">Click the button to check your speed</div>
+  <div id="spinner" class="spinner" style="display: none;"></div>
+
+  <script>
+    function checkFullSpeed() {
+      const testUrl = "https://via.placeholder.com/500.jpg"; // URL of a test image
+      const imageSize = 500000; // Approximate size of the image in bytes (500 KB)
+      const testDuration = 30; // Duration of the test in seconds
+      const results = [];
+      let totalDataDownloaded = 0; // Total data downloaded in bytes
+      let testStartTime = null;
+
+      document.getElementById('result').textContent = "Testing... Please wait 30 seconds.";
+      document.getElementById('spinner').style.display = "inline-block";
+
+      function downloadTestImage() {
+        const image = new Image();
+        const startTime = Date.now();
+
+        image.onload = () => {
+          const endTime = Date.now();
+          const duration = (endTime - startTime) / 1000; // Time in seconds
+          if (duration > 0) {
+            totalDataDownloaded += imageSize; // Add to total downloaded data
+            results.push(duration); // Record the time taken
+          }
+
+          // Continue downloading if within test duration
+          if (Date.now() - testStartTime < testDuration * 1000) {
+            downloadTestImage();
+          } else {
+            // Test completed, calculate speed
+            const speedMbps = ((totalDataDownloaded * 8) / (testDuration * 1024 * 1024)).toFixed(2); // Speed in Mbps
+            document.getElementById('spinner').style.display = "none";
+            document.getElementById('result').textContent = `Download Speed: ${speedMbps} Mbps (30-sec average)`;
+          }
+        };
+
+        image.onerror = () => {
+          document.getElementById('spinner').style.display = "none";
+          document.getElementById('result').textContent = "Error during speed test. Please try again.";
+        };
+
+        image.src = testUrl + "?cache-bust=" + Date.now();
+      }
+
+      // Start the test
+      testStartTime = Date.now();
+      downloadTestImage();
+    }
+  </script>
+</body>
+</html>
